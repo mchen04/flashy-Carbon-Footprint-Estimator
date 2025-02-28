@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { CarbonResult } from '../types';
 import gsap from 'gsap';
 import { Award, Leaf, AlertTriangle, Info } from 'lucide-react';
@@ -45,22 +44,8 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({ result }) => {
   
   if (!result) return null;
   
-  // Brighter, more distinct colors for better visibility
-  const COLORS = ['#00A3FF', '#FF6B00', '#FFD700', '#00E676'];
-  
-  const pieData = [
-    { name: 'Transport', value: result.breakdown.transport },
-    { name: 'Diet', value: result.breakdown.diet },
-    { name: 'Energy', value: result.breakdown.energy },
-    { name: 'Waste', value: result.breakdown.waste }
-  ];
-  
-  const barData = [
-    { name: 'Transport', emissions: result.breakdown.transport, fill: '#00A3FF' },
-    { name: 'Diet', emissions: result.breakdown.diet, fill: '#FF6B00' },
-    { name: 'Energy', emissions: result.breakdown.energy, fill: '#FFD700' },
-    { name: 'Waste', emissions: result.breakdown.waste, fill: '#00E676' }
-  ];
+  // Highly distinct colors with strong contrast for better visibility
+  const COLORS = ['#FF3B30', '#34C759', '#007AFF', '#FF9500'];
   
   const getEcoScoreLabel = (score: number) => {
     if (score >= 80) return 'Excellent';
@@ -120,84 +105,148 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({ result }) => {
         </div>
       </motion.div>
       
-      {/* Charts section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <motion.div 
-          className="bg-gray-900 rounded-lg p-6 shadow-xl border border-gray-700"
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <h3 className="text-xl font-bold text-white mb-4">Emissions by Category</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  animationDuration={1500}
-                  animationBegin={300}
-                  strokeWidth={2}
-                  stroke="#121212"
+      {/* Interactive Visualization Section */}
+      <motion.div
+        className="mb-8 bg-gray-900 rounded-lg p-8 shadow-2xl border border-gray-700"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <h3 className="text-2xl font-bold text-white mb-6 text-center">Carbon Footprint Breakdown</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {[
+            { name: 'Transport', value: result.breakdown.transport, color: '#FF3B30', icon: '🚗' },
+            { name: 'Diet', value: result.breakdown.diet, color: '#34C759', icon: '🍔' },
+            { name: 'Energy', value: result.breakdown.energy, color: '#007AFF', icon: '⚡' },
+            { name: 'Waste', value: result.breakdown.waste, color: '#FF9500', icon: '♻️' }
+          ].map((category, index) => {
+            // Calculate percentage of total
+            const percentage = (category.value / result.totalEmissions) * 100;
+            
+            return (
+              <motion.div
+                key={category.name}
+                className="bg-black bg-opacity-40 rounded-lg p-5 border border-gray-700 flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4 + (index * 0.1) }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(255,255,255,0.2)' }}
+              >
+                <div
+                  className="text-5xl mb-3"
+                  style={{ textShadow: '0 0 10px rgba(255,255,255,0.5)' }}
                 >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']}
-                  contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', borderColor: '#444', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
-                  labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                  {category.icon}
+                </div>
+                <h4 className="text-xl font-bold text-white mb-2">{category.name}</h4>
+                
+                <div className="w-full bg-gray-800 rounded-full h-4 mb-3 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: category.color, width: '0%' }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 + (index * 0.1) }}
+                  />
+                </div>
+                
+                <div className="flex justify-between w-full">
+                  <span className="text-gray-400 text-sm">{percentage.toFixed(0)}%</span>
+                  <motion.span
+                    className="text-white font-bold"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 + (index * 0.1) }}
+                  >
+                    {category.value.toFixed(2)} kg
+                  </motion.span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+        
+        {/* Animated Total Emissions Counter */}
+        <motion.div
+          className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-6 mb-6 border border-gray-700 text-center"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <h4 className="text-lg text-gray-400 mb-2">Total Carbon Footprint</h4>
+          <div className="flex items-center justify-center">
+            <motion.span
+              className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 100,
+                delay: 1
+              }}
+            >
+              {result.totalEmissions.toFixed(2)}
+            </motion.span>
+            <span className="ml-2 text-2xl text-gray-300">kg CO₂e</span>
           </div>
         </motion.div>
         
-        <motion.div 
-          className="bg-gray-900 rounded-lg p-6 shadow-xl border border-gray-700"
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
+        {/* Eco Score Gauge */}
+        <motion.div
+          className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-6 border border-gray-700"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1 }}
         >
-          <h3 className="text-xl font-bold text-white mb-4">Emissions Breakdown</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={barData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <XAxis dataKey="name" stroke="#FFFFFF" />
-                <YAxis stroke="#FFFFFF" />
-                <Tooltip 
-                  formatter={(value) => [`${value.toFixed(2)} kg CO₂e`, 'Emissions']}
-                  contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', borderColor: '#444', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
-                  labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                />
-                <Legend 
-                  wrapperStyle={{ color: '#fff' }}
-                  formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
-                />
-                <Bar 
-                  dataKey="emissions" 
-                  name="CO₂ Emissions (kg)" 
-                  animationDuration={1500}
-                  radius={[4, 4, 0, 0]}
-                  barSize={40}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="flex justify-between mb-2">
+            <h4 className="text-lg text-white">Eco Score</h4>
+            <span className="text-lg font-medium text-white">{result.ecoScore.toFixed(0)}/100</span>
+          </div>
+          
+          <div className="relative h-8 w-full bg-gray-700 rounded-full overflow-hidden mb-2">
+            <motion.div
+              className="absolute top-0 left-0 h-full rounded-full"
+              style={{
+                background: `linear-gradient(90deg,
+                  ${result.ecoScore < 20 ? '#FF3B30' :
+                    result.ecoScore < 40 ? '#FF9500' :
+                    result.ecoScore < 60 ? '#FFCC00' :
+                    result.ecoScore < 80 ? '#34C759' : '#00C7BE'}
+                  ,
+                  ${result.ecoScore < 20 ? '#FF9500' :
+                    result.ecoScore < 40 ? '#FFCC00' :
+                    result.ecoScore < 60 ? '#34C759' :
+                    result.ecoScore < 80 ? '#00C7BE' : '#007AFF'})`,
+                width: '0%'
+              }}
+              animate={{ width: `${result.ecoScore}%` }}
+              transition={{ duration: 2, ease: "easeOut", delay: 1.2 }}
+            />
+            
+            <motion.div
+              className="absolute top-0 left-0 h-full w-full flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+            >
+              <span className="text-white font-bold text-sm drop-shadow-lg">
+                {result.ecoScore < 20 ? 'Critical' :
+                 result.ecoScore < 40 ? 'Poor' :
+                 result.ecoScore < 60 ? 'Average' :
+                 result.ecoScore < 80 ? 'Good' : 'Excellent'}
+              </span>
+            </motion.div>
+          </div>
+          
+          <div className="flex justify-between text-xs text-gray-400">
+            <span>Critical</span>
+            <span>Poor</span>
+            <span>Average</span>
+            <span>Good</span>
+            <span>Excellent</span>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
       
       {/* Activities list */}
       <motion.div 

@@ -59,8 +59,11 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
     return highlightedText;
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     if (input.trim() && !isLoading) {
+      console.log("Submitting input:", input);
       onSubmit(input);
     }
   };
@@ -100,7 +103,7 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
             <div></div>
           </div>
           
-          <div className="p-4">
+          <form onSubmit={handleSubmit} className="p-4">
             <div className="text-green-400 text-sm mb-2">$ carbon-analyze</div>
             <div className="mb-4">
               <div className="text-gray-300 text-sm mb-1">Describe your daily activities:</div>
@@ -113,7 +116,7 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
                 placeholder="I drove 20 miles, ate a burger, and charged my laptop overnight..."
                 rows={4}
               />
-              <div 
+              <div
                 className="text-xs text-gray-400 mt-1 hidden"
                 dangerouslySetInnerHTML={{ __html: highlightText(input) }}
               />
@@ -121,6 +124,7 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
             
             <div className="flex justify-between">
               <motion.button
+                type="button"
                 onClick={clearInput}
                 className="flex items-center px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md text-sm"
                 whileHover={{ scale: 1.05 }}
@@ -131,13 +135,14 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
               </motion.button>
               
               <motion.button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={!input.trim() || isLoading}
                 className={`flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-md text-sm font-medium ${
                   !input.trim() || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:from-green-600 hover:to-blue-600'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: input.trim() && !isLoading ? 1.05 : 1 }}
+                whileTap={{ scale: input.trim() && !isLoading ? 0.95 : 1 }}
+                style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
               >
                 {isLoading ? (
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -150,7 +155,7 @@ const InputSection: React.FC<InputSectionProps> = ({ onSubmit, isLoading }) => {
                 {isLoading ? 'Analyzing...' : 'Analyze Footprint'}
               </motion.button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
       

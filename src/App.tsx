@@ -6,7 +6,7 @@ import BackgroundEffect from './components/BackgroundEffect';
 import ThemeToggle from './components/ThemeToggle';
 import Header from './components/Header';
 import { CarbonResult } from './types';
-import { analyzeCarbonFootprint } from './utils/mockLLM';
+import { analyzeCarbonFootprintWithAI } from './utils/openaiService';
 import { Github } from 'lucide-react';
 
 function App() {
@@ -26,16 +26,25 @@ function App() {
   }, []);
   
   const handleSubmit = async (input: string) => {
+    console.log("App: handleSubmit called with input:", input);
+    
+    // Set initial states
     setUserInput(input);
     setIsLoading(true);
     
     try {
-      const result = await analyzeCarbonFootprint(input);
+      console.log("App: Calling analyzeCarbonFootprintWithAI");
+      const result = await analyzeCarbonFootprintWithAI(input);
+      console.log("App: Received result:", result);
+      
+      // Update the result state
       setResult(result);
     } catch (error) {
       console.error('Error analyzing carbon footprint:', error);
-      // Handle error state
+      // Show an alert to the user
+      alert("There was an error analyzing your carbon footprint. Please try again.");
     } finally {
+      // Always set loading to false when done
       setIsLoading(false);
     }
   };
