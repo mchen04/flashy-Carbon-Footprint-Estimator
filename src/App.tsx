@@ -122,16 +122,10 @@ function App() {
         
         <InputSection onSubmit={handleSubmit} isLoading={isLoading} />
         
-        {result && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mt-8"
-          >
-            <ResultsSection result={result} />
-          </motion.div>
-        )}
+        {/* Results section - no animations to ensure stability */}
+        <div className="mt-8">
+          {result && <ResultsSection result={result} />}
+        </div>
         
         <motion.footer 
           className="mt-16 text-center text-gray-400 text-sm py-4"
