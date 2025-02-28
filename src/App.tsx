@@ -122,18 +122,16 @@ function App() {
         
         <InputSection onSubmit={handleSubmit} isLoading={isLoading} />
         
-        <AnimatePresence>
-          {result && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ResultsSection result={result} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mt-8"
+          >
+            <ResultsSection result={result} />
+          </motion.div>
+        )}
         
         <motion.footer 
           className="mt-16 text-center text-gray-400 text-sm py-4"

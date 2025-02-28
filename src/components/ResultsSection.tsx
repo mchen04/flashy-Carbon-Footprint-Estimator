@@ -108,9 +108,9 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({ result }) => {
       {/* Interactive Visualization Section */}
       <motion.div
         className="mb-8 bg-gray-900 rounded-lg p-8 shadow-2xl border border-gray-700"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
       >
         <h3 className="text-2xl font-bold text-white mb-6 text-center">Carbon Footprint Breakdown</h3>
         
